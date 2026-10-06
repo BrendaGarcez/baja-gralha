@@ -52,11 +52,12 @@ Sistema oficial de gestão de membros, presença e ponto biométrico da equipe *
 
 O computador onde o sensor físico está conectado só precisa executar o microserviço C# local:
 
-### 1. Requisitos
-- Windows 10/11
-- Drivers do **DigitalPersona U.are.U 4000B** instalados
-- Sensor conectado a uma porta USB
-- [.NET Desktop Runtime 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (caso o Windows solicite)
+### 1. Requisitos & Instalação do Driver
+- Conecte o sensor **DigitalPersona U.are.U 4000B** na porta USB.
+- Instale os drivers oficiais inclusos nesta pasta:
+  Vá em `leitor biometrico/Driver e SDK/Digital-Persona-SDK-main/RTE/` e execute o **`Setup.exe`**.
+  *(Se quiser instalar o SDK completo com ferramentas de teste, execute o `Setup.exe` da pasta `SDK/`)*.
+- [.NET Desktop Runtime 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) (caso o Windows solicite ao iniciar o serviço).
 
 ### 2. Configurar a Inicialização Automática (1 Clique)
 1. Clone o repositório ou baixe a pasta `leitor biometrico`:
