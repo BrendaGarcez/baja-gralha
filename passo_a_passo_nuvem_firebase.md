@@ -51,7 +51,7 @@ Este guia explica como colocar o **Sistema de Gerenciamento & Ponto Biométrico 
 7. O Firebase exibirá um bloco de código como este:
    ```javascript
    const firebaseConfig = {
-     apiKey: "AIzaSy...",
+     apiKey: "sua_chave_firebase_aqui",
      authDomain: "baja-gralha.firebaseapp.com",
      projectId: "baja-gralha",
      storageBucket: "baja-gralha.firebasestorage.app",
@@ -78,7 +78,7 @@ Você tem duas formas muito simples:
 1. Na pasta `frontend/`, crie um arquivo chamado `.env` (baseado no `.env.example`).
 2. Preencha com os dados do seu Firebase:
    ```env
-   VITE_FIREBASE_API_KEY=AIzaSy...
+   VITE_FIREBASE_API_KEY=sua_chave_firebase_aqui
    VITE_FIREBASE_PROJECT_ID=baja-gralha
    VITE_FIREBASE_AUTH_DOMAIN=baja-gralha.firebaseapp.com
    VITE_FIREBASE_STORAGE_BUCKET=baja-gralha.firebasestorage.app

@@ -311,7 +311,7 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
                     type="password"
                     value={config.apiKey}
                     onChange={e => setConfig({ ...config, apiKey: e.target.value })}
-                    placeholder="AIzaSy..."
+                    placeholder="sua_chave_firebase_aqui"
                     className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"
                   />
                 </div>
