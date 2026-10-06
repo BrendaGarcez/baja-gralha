@@ -1,0 +1,31 @@
+# Variáveis de ambiente e segredos (NÃO ENVIAR AO GIT)
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+.firebaserc
+.firebase/
+
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Python / Backend
+backend/venv/
+backend/__pycache__/
+*.pyc
+backend/*.db
+
+# C# / .NET
+.vs/
+**/obj/
+**/bin/Debug/
+**/bin/x86/
+**/bin/x64/
+*.user
+*.suo
+
+# Arquivos de log e temporários
+*.log

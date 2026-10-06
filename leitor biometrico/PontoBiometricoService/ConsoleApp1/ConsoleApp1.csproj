@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UseWindowsForms>true</UseWindowsForms>
+        <!-- Força compilação 32-bit (obrigatório para as DLLs C++ do U.are.U 4000B) -->
+        <PlatformTarget>x86</PlatformTarget>
+        <Platforms>x86</Platforms>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <Reference Include="DPFPDevNET">
+            <HintPath>C:\Program Files\DigitalPersona\One Touch SDK\.NET\Bin\DPFPDevNET.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="DPFPEngNET">
+            <HintPath>C:\Program Files\DigitalPersona\One Touch SDK\.NET\Bin\DPFPEngNET.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="DPFPGuiNET">
+            <HintPath>C:\Program Files\DigitalPersona\One Touch SDK\.NET\Bin\DPFPGuiNET.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="DPFPShrNET">
+            <HintPath>C:\Program Files\DigitalPersona\One Touch SDK\.NET\Bin\DPFPShrNET.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+        <Reference Include="DPFPVerNET">
+            <HintPath>C:\Program Files\DigitalPersona\One Touch SDK\.NET\Bin\DPFPVerNET.dll</HintPath>
+            <Private>True</Private>
+        </Reference>
+    </ItemGroup>
+
+</Project>

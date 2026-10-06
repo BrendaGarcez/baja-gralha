@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+  </Configurations>
+  <Project Path="ConsoleApp1/ConsoleApp1.csproj">
+    <Platform Solution="*|Any CPU" Project="AnyCPU" />
+  </Project>
+</Solution>
