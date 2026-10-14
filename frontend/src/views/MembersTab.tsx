@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Users, Plus, Search, Trash2, Edit2, Fingerprint, ShieldCheck,
-  ShieldOff, AlertTriangle, Loader2, CheckCircle2
+  ShieldOff, AlertCircle, Loader2, CheckCircle2
 } from 'lucide-react';
 import { Sheet } from '../components/ui/Sheet';
 import { BiometricScanner } from '../components/biometry/BiometricScanner';
@@ -9,8 +9,8 @@ import { biometryService } from '../services/biometryService';
 import { useBiometryReader } from '../hooks/useBiometryReader';
 import type { Usuario, UsuarioCreate, UsuarioUpdate } from '../services/types';
 
-const SETORES = ['Chassi & Suspensão', 'Powertrain', 'Eletrônica & Telemetria', 'Freios', 'Aerodinâmica', 'Diretoria & Gestão', 'Geral'];
-const CARGOS = ['Capitão', 'Diretor', 'Membro Efetivo', 'Trainee / Estagiário', 'Membro'];
+const SETORES = ['Gestão', 'Projetos', 'Marketing', 'Manufatura', 'Tríplice', 'Trainee'];
+const CARGOS = ['Capitão', 'Diretor', 'Membro Efetivo', 'Trainee', 'Membro'];
 
 interface FormState {
   id: string;
@@ -20,7 +20,7 @@ interface FormState {
 }
 
 const FORM_INICIAL: FormState = {
-  id: '', nome: '', setor: 'Geral', cargo: 'Membro',
+  id: '', nome: '', setor: 'Projetos', cargo: 'Membro',
 };
 
 export const MembersTab: React.FC = () => {
@@ -57,7 +57,6 @@ export const MembersTab: React.FC = () => {
     setForm(FORM_INICIAL);
     setFeedback(null);
     setSheetOpen(true);
-    // Inicia captura biométrica imediatamente
     startCapture();
   };
 
@@ -66,7 +65,6 @@ export const MembersTab: React.FC = () => {
     setForm({ id: String(u.id), nome: u.nome, setor: u.setor, cargo: u.cargo });
     setFeedback(null);
     setSheetOpen(true);
-    // Inicia captura biométrica para permitir recadastro
     startCapture();
   };
 
@@ -78,7 +76,7 @@ export const MembersTab: React.FC = () => {
 
   const handleSalvar = async () => {
     if (!form.nome.trim()) {
-      setFeedback({ tipo: 'error', msg: 'Nome é obrigatório.' });
+      setFeedback({ tipo: 'error', msg: 'O nome do membro é obrigatório.' });
       return;
     }
     setSalvando(true);
@@ -94,7 +92,7 @@ export const MembersTab: React.FC = () => {
           payload.template_base64 = templateBase64;
         }
         await biometryService.updateUsuario(editando.id, payload);
-        setFeedback({ tipo: 'success', msg: 'Membro atualizado com sucesso!' });
+        setFeedback({ tipo: 'success', msg: 'Dados atualizados com sucesso.' });
       } else {
         const payload: UsuarioCreate = {
           nome: form.nome.trim(),
@@ -104,12 +102,12 @@ export const MembersTab: React.FC = () => {
         if (form.id.trim()) payload.id = parseInt(form.id.trim());
         if (templateBase64) payload.template_base64 = templateBase64;
         await biometryService.createUsuario(payload);
-        setFeedback({ tipo: 'success', msg: 'Membro cadastrado com sucesso!' });
+        setFeedback({ tipo: 'success', msg: 'Membro cadastrado com sucesso.' });
       }
       await fetchUsuarios();
-      setTimeout(() => fecharSheet(), 1200);
+      setTimeout(() => fecharSheet(), 1000);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Erro ao salvar.';
+      const msg = e instanceof Error ? e.message : 'Falha ao salvar dados.';
       setFeedback({ tipo: 'error', msg });
     } finally {
       setSalvando(false);
@@ -124,7 +122,7 @@ export const MembersTab: React.FC = () => {
       setConfirmDelete(null);
       await fetchUsuarios();
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Erro ao remover.');
+      alert(e instanceof Error ? e.message : 'Falha ao excluir membro.');
     } finally {
       setDeletando(false);
     }
@@ -137,188 +135,200 @@ export const MembersTab: React.FC = () => {
     return matchSearch && matchSetor;
   });
 
-  const getCargoBadgeColor = (cargo: string) => {
-    if (cargo.includes('Capitão')) return 'bg-amber-50 text-amber-800 border-amber-200';
-    if (cargo.includes('Diretor')) return 'bg-purple-50 text-purple-800 border-purple-200';
-    if (cargo.includes('Trainee')) return 'bg-slate-100 text-slate-700 border-slate-200';
-    return 'bg-blue-50 text-blue-800 border-blue-200';
-  };
-
   return (
-    <div className="max-w-6xl mx-auto py-2 space-y-6">
-      {/* Topo Clean */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="max-w-6xl mx-auto space-y-5">
+      {/* Topo Limpo */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-2 border-b border-slate-200">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Users className="w-6 h-6 text-blue-600" />
-            Membros da Equipe
-          </h2>
-          <p className="text-slate-500 text-sm mt-0.5">{usuarios.length} membros cadastrados no sistema</p>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Equipe & Membros</h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {usuarios.length} membros cadastrados com registro biométrico
+          </p>
         </div>
         <button
           onClick={abrirNovo}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-sm shadow-blue-500/20 transition font-bold text-sm active:scale-98 cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-xs font-medium shadow-xs shadow-blue-600/20 active:scale-98"
         >
-          <Plus className="w-4 h-4" /> Novo Membro
+          <Plus className="w-3.5 h-3.5" />
+          Cadastrar Membro
         </button>
       </div>
 
-      {/* Filtros Clean */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      {/* Barra de Busca e Filtros (IHC: Eficiência de Uso) */}
+      <div className="flex flex-col sm:flex-row gap-2.5">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
           <input
             type="text"
             placeholder="Buscar por nome ou ID..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition shadow-xs"
+            className="w-full pl-9 pr-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-500 shadow-2xs"
           />
         </div>
         <select
           value={filtroSetor}
           onChange={e => setFiltroSetor(e.target.value)}
-          className="px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition shadow-xs"
+          className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:outline-none focus:border-slate-500 shadow-2xs sm:w-48"
         >
           <option value="Todos">Todos os Setores</option>
           {SETORES.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
-      {/* Grid de membros — Cards Brancos com elevação suave */}
+      {/* Lista de Membros (IHC: Consistência e Escaneabilidade Visual) */}
       {loading ? (
-        <div className="flex items-center justify-center py-20 text-slate-400">
-          <Loader2 className="w-6 h-6 animate-spin mr-2 text-blue-600" /> Carregando membros...
+        <div className="flex items-center justify-center py-16 text-slate-400 bg-white border border-slate-200 rounded-xl">
+          <Loader2 className="w-5 h-5 animate-spin mr-2 text-slate-600" />
+          <span className="text-xs">Carregando lista de membros...</span>
         </div>
       ) : usuariosFiltrados.length === 0 ? (
-        <div className="text-center py-20 bg-white border border-slate-200 rounded-2xl p-8 shadow-xs">
-          <Users className="w-12 h-12 mx-auto mb-3 text-slate-300" />
-          <p className="text-base font-bold text-slate-700">Nenhum membro encontrado</p>
-          <p className="text-xs text-slate-500 mt-1">Cadastre o primeiro integrante da equipe Baja Gralha.</p>
-          <button onClick={abrirNovo} className="mt-4 text-blue-600 hover:text-blue-700 font-semibold text-sm">
-            Cadastrar primeiro membro →
+        <div className="text-center py-16 bg-white border border-slate-200 rounded-xl p-6 shadow-2xs">
+          <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
+          <p className="text-sm font-semibold text-slate-700">Nenhum membro encontrado</p>
+          <p className="text-xs text-slate-400 mt-0.5">Tente ajustar os filtros ou adicione um novo integrante.</p>
+          <button
+            onClick={abrirNovo}
+            className="mt-3 text-xs text-slate-700 font-medium underline underline-offset-4 hover:text-slate-900"
+          >
+            Cadastrar membro agora
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {usuariosFiltrados.map(u => (
-            <div
-              key={u.id}
-              className="bg-white border border-slate-200 rounded-2xl p-4.5 flex flex-col gap-3.5 hover:border-blue-300 hover:shadow-md transition group shadow-xs"
-            >
-              {/* Cabeçalho do card */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-xs">
-                    {u.nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-bold text-slate-900 text-sm truncate">{u.nome}</p>
-                    <p className="text-xs text-slate-400 font-mono">ID #{u.id}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1 opacity-80 group-hover:opacity-100 transition">
-                  <button
-                    onClick={() => abrirEdicao(u)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition"
-                    title="Editar Membro"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setConfirmDelete(u)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
-                    title="Remover Membro"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-slate-700">
+              <thead className="bg-slate-50 text-slate-500 uppercase font-medium border-b border-slate-200">
+                <tr>
+                  <th className="px-4 py-2.5">Colaborador</th>
+                  <th className="px-4 py-2.5">Setor & Cargo</th>
+                  <th className="px-4 py-2.5 text-center">Biometria</th>
+                  <th className="px-4 py-2.5 text-center">Presenças</th>
+                  <th className="px-4 py-2.5 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {usuariosFiltrados.map(u => (
+                  <tr key={u.id} className="hover:bg-slate-50/80 transition">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
+                          {u.nome.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900">{u.nome}</p>
+                          <p className="text-[11px] text-slate-400 font-mono">ID #{u.id}</p>
+                        </div>
+                      </div>
+                    </td>
 
-              {/* Info Badges */}
-              <div className="flex flex-wrap gap-1.5">
-                <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getCargoBadgeColor(u.cargo)}`}>
-                  {u.cargo}
-                </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold border bg-slate-100 text-slate-700 border-slate-200">
-                  {u.setor}
-                </span>
-              </div>
+                    <td className="px-4 py-3">
+                      <p className="text-slate-800">{u.setor}</p>
+                      <p className="text-[11px] text-slate-400">{u.cargo?.replace(/\s*\/\s*Estagiário/gi, '').replace(/^Estagiário$/gi, 'Trainee') || 'Membro'}</p>
+                    </td>
 
-              {/* Footer do card */}
-              <div className="flex items-center justify-between pt-2.5 border-t border-slate-100 mt-auto">
-                <div className="flex items-center gap-1.5 text-xs font-medium">
-                  {u.tem_biometria ? (
-                    <><ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /><span className="text-emerald-700">Digital Ativa</span></>
-                  ) : (
-                    <><ShieldOff className="w-3.5 h-3.5 text-slate-400" /><span className="text-slate-400">Sem digital</span></>
-                  )}
-                </div>
-                <span className="text-xs text-slate-500 font-mono font-medium">{u.total_presencas} presença(s)</span>
-              </div>
-            </div>
-          ))}
+                    <td className="px-4 py-3 text-center">
+                      {u.tem_biometria ? (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          <ShieldCheck className="w-3 h-3 text-emerald-600" /> Cadastrada
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                          <ShieldOff className="w-3 h-3 text-slate-400" /> Pendente
+                        </span>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3 text-center font-mono font-medium text-slate-800">
+                      {u.total_presencas}
+                    </td>
+
+                    <td className="px-4 py-3 text-right">
+                      <div className="inline-flex items-center gap-1">
+                        <button
+                          onClick={() => abrirEdicao(u)}
+                          className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                          title="Editar cadastro"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(u)}
+                          className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                          title="Excluir membro"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      {/* Sheet de Cadastro / Edição — Clean White */}
+      {/* Gaveta Lateral (Sheet) para Cadastro / Edição */}
       <Sheet
         open={sheetOpen}
         onClose={fecharSheet}
         title={editando ? 'Editar Membro' : 'Novo Membro'}
-        subtitle={editando ? `Alterando dados de ${editando.nome}` : 'Cadastre um novo integrante e capture a digital no leitor USB'}
+        subtitle={editando ? `Atualize as informações de ${editando.nome}` : 'Preencha os dados e capture a digital no leitor USB'}
         footer={
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
               onClick={fecharSheet}
-              className="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-semibold transition"
+              className="flex-1 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-medium transition"
             >
               Cancelar
             </button>
             <button
               onClick={handleSalvar}
               disabled={salvando}
-              className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm shadow-blue-500/20"
+              className="flex-1 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-xs shadow-blue-600/20 active:scale-98"
             >
-              {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {salvando ? 'Salvando...' : editando ? 'Salvar Alterações' : 'Cadastrar Membro'}
+              {salvando && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {salvando ? 'Salvando...' : editando ? 'Salvar Alterações' : 'Concluir Cadastro'}
             </button>
           </div>
         }
       >
-        {/* Feedback */}
         {feedback && (
-          <div className={`flex items-start gap-2.5 p-3.5 rounded-xl text-xs font-semibold border ${
+          <div className={`p-3 rounded-lg text-xs font-medium border mb-4 ${
             feedback.tipo === 'success'
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
               : 'bg-rose-50 border-rose-200 text-rose-800'
           }`}>
-            {feedback.tipo === 'success'
-              ? <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
-              : <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />}
-            {feedback.msg}
+            <div className="flex items-center gap-2">
+              {feedback.tipo === 'success' ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              )}
+              <span>{feedback.msg}</span>
+            </div>
           </div>
         )}
 
-        {/* Formulário */}
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           {!editando && (
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                ID / Matrícula <span className="text-slate-400 font-normal">(opcional — gerado automaticamente se vazio)</span>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                ID / Matrícula <span className="text-slate-400 font-normal">(opcional)</span>
               </label>
               <input
                 type="number"
-                placeholder="Ex: 101"
+                placeholder="Gerado automaticamente se vazio"
                 value={form.id}
                 onChange={e => setForm(f => ({ ...f, id: e.target.value }))}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition font-mono"
+                className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-500 font-mono shadow-2xs"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            <label className="block text-xs font-medium text-slate-700 mb-1">
               Nome Completo <span className="text-rose-500">*</span>
             </label>
             <input
@@ -326,48 +336,47 @@ export const MembersTab: React.FC = () => {
               placeholder="Ex: Brenda Garcez"
               value={form.nome}
               onChange={e => setForm(f => ({ ...f, nome: e.target.value }))}
-              className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition"
+              className="w-full px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-500 shadow-2xs"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Setor</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Setor</label>
               <select
                 value={form.setor}
                 onChange={e => setForm(f => ({ ...f, setor: e.target.value }))}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition"
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-slate-500 shadow-2xs"
               >
                 {SETORES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Cargo</label>
+              <label className="block text-xs font-medium text-slate-700 mb-1">Cargo</label>
               <select
                 value={form.cargo}
                 onChange={e => setForm(f => ({ ...f, cargo: e.target.value }))}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 transition"
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-slate-500 shadow-2xs"
               >
                 {CARGOS.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
           </div>
 
-          {/* Leitor Biométrico Integrado — Clean White & Blue */}
-          <div className="border border-slate-200 rounded-2xl p-4 space-y-3 bg-slate-50/60 shadow-xs">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                <Fingerprint className="w-4 h-4 text-blue-600" />
-                Leitor Biométrico DigitalPersona USB
-              </div>
+          {/* Seção Biométrica */}
+          <div className="border border-slate-200 rounded-xl p-3.5 space-y-2.5 bg-slate-50/50 mt-4">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-slate-800 flex items-center gap-1.5">
+                <Fingerprint className="w-3.5 h-3.5 text-slate-600" /> Leitura Biométrica USB
+              </span>
               {templateBase64 ? (
-                <span className="text-emerald-700 font-mono text-[11px] font-bold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Digital Lida!
+                <span className="text-emerald-700 font-medium flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Digital pronta
                 </span>
               ) : editando?.tem_biometria ? (
-                <span className="text-blue-700 text-[11px] font-semibold">Digital salva (opcional alterar)</span>
+                <span className="text-slate-500">Digital já gravada</span>
               ) : (
-                <span className="text-slate-400 text-[11px]">Encoste o dedo no sensor</span>
+                <span className="text-slate-400">Aguardando dedo</span>
               )}
             </div>
 
@@ -377,47 +386,35 @@ export const MembersTab: React.FC = () => {
               onReset={resetCapture}
               hasTemplate={Boolean(templateBase64)}
             />
-
-            {templateBase64 && (
-              <div className="flex items-center gap-2 text-emerald-800 text-xs font-semibold bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-2.5 shadow-xs">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
-                Digital pronta para ser salva no perfil do membro!
-              </div>
-            )}
           </div>
         </div>
       </Sheet>
 
-      {/* Modal de confirmação de exclusão — Clean White */}
+      {/* Confirmação de Exclusão (IHC: Prevenção de Erros Graves) */}
       {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(3px)' }}>
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-sm shadow-xl">
-            <div className="flex items-start gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center shrink-0">
-                <Trash2 className="w-5 h-5 text-rose-600" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900">Remover Membro</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Confirma a remoção de <strong className="text-slate-800">{confirmDelete.nome}</strong>? 
-                  Todos os registros de ponto dele serão desvinculados.
-                </p>
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-xl p-5 w-full max-w-sm shadow-xl space-y-4">
+            <div>
+              <h3 className="font-bold text-sm text-slate-900">Confirmar Exclusão</h3>
+              <p className="text-xs text-slate-500 mt-1">
+                Deseja remover <strong>{confirmDelete.nome}</strong>? Os registros de ponto anteriores serão desvinculados deste membro.
+              </p>
             </div>
-            <div className="flex gap-3">
+
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="flex-1 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 text-sm font-semibold transition"
+                className="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-medium transition"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deletando}
-                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-xs"
+                className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-medium transition flex items-center gap-1.5"
               >
-                {deletando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                {deletando ? 'Removendo...' : 'Remover'}
+                {deletando && <Loader2 className="w-3 h-3 animate-spin" />}
+                Remover Membro
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Fingerprint, CheckCircle2, AlertCircle, RefreshCw, Radio } from 'lucide-react';
+import { Fingerprint, CheckCircle2, AlertCircle, RefreshCw, Radio, Loader2 } from 'lucide-react';
 import { ScannerState } from '../../services/types';
 
 interface BiometricScannerProps {
@@ -19,45 +19,45 @@ export const BiometricScanner: FC<BiometricScannerProps> = ({
     switch (state) {
       case 'WAITING_FINGER':
         return {
-          ringColor: 'border-blue-500 shadow-xl shadow-blue-500/20 bg-blue-50/40',
+          containerClass: 'border-blue-500 bg-blue-50/40 shadow-xs shadow-blue-500/10',
           iconColor: 'text-blue-600',
-          statusText: 'Aguardando dedo no leitor USB...',
-          subText: 'Posicione o dedo indicador firmemente no sensor',
-          showRipple: true,
+          badgeText: 'Aguardando dedo no sensor',
+          statusText: 'Posicione o dedo indicador no leitor USB',
+          subText: 'Mantenha o dedo firme até a confirmação',
         };
       case 'PROCESSING':
         return {
-          ringColor: 'border-amber-500 shadow-xl shadow-amber-500/25 bg-amber-50/40 animate-pulse',
-          iconColor: 'text-amber-600',
-          statusText: 'Processando biometria...',
-          subText: 'Extraindo minúcias e gerando template...',
-          showRipple: false,
+          containerClass: 'border-blue-400 bg-blue-50/30',
+          iconColor: 'text-blue-600',
+          badgeText: 'Processando digital',
+          statusText: 'Identificando minúcias...',
+          subText: 'Aguarde a validação biométrica',
         };
       case 'SUCCESS':
         return {
-          ringColor: 'border-emerald-500 shadow-xl shadow-emerald-500/25 bg-emerald-50/60',
-          iconColor: 'text-emerald-600',
-          statusText: 'Digital lida com sucesso!',
-          subText: 'Template biométrico gerado e pronto para envio',
-          showRipple: false,
+          containerClass: 'border-emerald-500 bg-emerald-50/40',
+          iconColor: 'text-emerald-700',
+          badgeText: 'Leitura concluída',
+          statusText: 'Digital lida com sucesso',
+          subText: 'Identidade pronta para confirmação de ponto',
         };
       case 'OFFLINE':
       case 'ERROR':
         return {
-          ringColor: 'border-rose-400 shadow-lg shadow-rose-500/15 bg-rose-50/60',
-          iconColor: 'text-rose-500',
-          statusText: 'Serviço C# não detectado',
-          subText: 'Execute o ConsoleApp1 e certifique-se da porta 5000',
-          showRipple: false,
+          containerClass: 'border-rose-300 bg-rose-50/40',
+          iconColor: 'text-rose-600',
+          badgeText: 'Leitor desconectado',
+          statusText: 'Serviço USB não detectado',
+          subText: 'Verifique se o serviço local está ativo na porta 5000',
         };
       case 'IDLE':
       default:
         return {
-          ringColor: 'border-slate-300 hover:border-slate-400 bg-slate-100/60',
+          containerClass: 'border-slate-200 bg-slate-50/50',
           iconColor: 'text-slate-400',
-          statusText: 'Sensor em repouso',
-          subText: 'Clique no botão abaixo para habilitar a captura',
-          showRipple: false,
+          badgeText: 'Em espera',
+          statusText: 'Sensor pronto para captura',
+          subText: 'Clique abaixo para ativar a leitura biométrica',
         };
     }
   };
@@ -65,73 +65,64 @@ export const BiometricScanner: FC<BiometricScannerProps> = ({
   const config = getVisualConfig();
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-2xl shadow-xs transition">
-      {/* Visual do Sensor */}
-      <div className="relative flex items-center justify-center mb-5 mt-2">
-        {config.showRipple && (
-          <div className="absolute w-36 h-36 rounded-full border-2 border-blue-400/40 animate-ping" />
-        )}
-
+    <div className="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-xl shadow-2xs">
+      {/* Sensor Icon / Status Container */}
+      <div className="flex flex-col items-center mb-4">
         <div
-          className={`relative z-10 flex items-center justify-center w-28 h-28 rounded-full border-2 shadow-inner transition-all duration-300 ${config.ringColor}`}
+          className={`relative flex items-center justify-center w-24 h-24 rounded-full border transition-colors ${config.containerClass}`}
         >
           {state === 'SUCCESS' ? (
-            <CheckCircle2 className="w-14 h-14 text-emerald-600 animate-bounce" />
+            <CheckCircle2 className="w-10 h-10 text-emerald-700" />
           ) : state === 'OFFLINE' || state === 'ERROR' ? (
-            <AlertCircle className="w-14 h-14 text-rose-500 animate-pulse" />
+            <AlertCircle className="w-10 h-10 text-rose-600" />
+          ) : state === 'PROCESSING' ? (
+            <Loader2 className="w-10 h-10 text-slate-700 animate-spin" />
           ) : (
-            <Fingerprint
-              className={`w-14 h-14 transition-all duration-300 ${config.iconColor} ${
-                state === 'WAITING_FINGER'
-                  ? 'animate-pulse scale-105'
-                  : state === 'PROCESSING'
-                  ? 'animate-spin'
-                  : ''
-              }`}
-            />
+            <Fingerprint className={`w-10 h-10 ${config.iconColor}`} />
           )}
         </div>
       </div>
 
-      {/* Textos de Estado com alta legibilidade (IHC) */}
-      <div className="text-center mb-6">
-        <h4 className="text-sm font-bold text-slate-800 transition-colors">
+      {/* Informações de Estado (IHC: Visibilidade de Estado do Sistema) */}
+      <div className="text-center mb-5 max-w-xs">
+        <span className="inline-block text-[11px] font-medium text-slate-500 mb-1">
+          {config.badgeText}
+        </span>
+        <h4 className="text-sm font-semibold text-slate-900">
           {config.statusText}
         </h4>
-        <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+        <p className="text-xs text-slate-500 mt-0.5">
           {config.subText}
         </p>
       </div>
 
-      {/* Ações / Botões */}
-      <div className="flex gap-2 w-full max-w-xs">
+      {/* Ações (IHC: Controle e Liberdade do Usuário) */}
+      <div className="w-full max-w-xs">
         {state === 'IDLE' ? (
           <button
             type="button"
             onClick={onStart}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm shadow-blue-500/20 active:scale-98 transition"
+            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition shadow-xs shadow-blue-600/20 active:scale-98"
           >
-            <Radio className="w-4 h-4 animate-pulse" />
-            Ativar Leitor
+            <Radio className="w-3.5 h-3.5" />
+            Ativar Leitor Biométrico
           </button>
         ) : (
           <button
             type="button"
             onClick={onReset}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-300 active:scale-98 transition"
+            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-medium text-xs border border-slate-300 transition shadow-2xs"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
             Reiniciar Leitor
           </button>
         )}
       </div>
 
-      {/* Indicador de Template Pronto */}
       {hasTemplate && state === 'SUCCESS' && (
-        <div className="mt-4 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold flex items-center gap-1.5 shadow-xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Biometria capturada com sucesso!
-        </div>
+        <p className="mt-3 text-[11px] text-emerald-700 font-medium">
+          Digital armazenada na sessão temporária
+        </p>
       )}
     </div>
   );

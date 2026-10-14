@@ -5,11 +5,11 @@ export const AttendanceTab = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const mockRegistros = [
-    { id: '101', nome: 'Brenda Garcez', setor: 'Chassi & Suspensão', hora: '14:02:15', status: 'CONFIRMADO' },
-    { id: '102', nome: 'Lucas Silva', setor: 'Powertrain', hora: '14:05:40', status: 'CONFIRMADO' },
-    { id: '103', nome: 'Mateus Ramos', setor: 'Eletrônica & Telemetria', hora: '14:12:01', status: 'CONFIRMADO' },
-    { id: '104', nome: 'Ana Paula Dias', setor: 'Freios', hora: '14:20:18', status: 'CONFIRMADO' },
-    { id: '105', nome: 'Gabriel Costa', setor: 'Diretoria & Gestão', hora: '14:35:50', status: 'CONFIRMADO' },
+    { id: '101', nome: 'Brenda Garcez', setor: 'Projetos', hora: '14:02:15', status: 'CONFIRMADO' },
+    { id: '102', nome: 'Lucas Silva', setor: 'Manufatura', hora: '14:05:40', status: 'CONFIRMADO' },
+    { id: '103', nome: 'Mateus Ramos', setor: 'Gestão', hora: '14:12:01', status: 'CONFIRMADO' },
+    { id: '104', nome: 'Ana Paula Dias', setor: 'Marketing', hora: '14:20:18', status: 'CONFIRMADO' },
+    { id: '105', nome: 'Gabriel Costa', setor: 'Tríplice', hora: '14:35:50', status: 'CONFIRMADO' },
   ];
 
   const registrosFiltrados = mockRegistros.filter(

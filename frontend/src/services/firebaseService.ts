@@ -369,9 +369,12 @@ export const firebaseService = {
     if (!db) throw new Error('Firebase não está configurado.');
 
     const colRef = collection(db, 'registros_ponto');
-    let q = query(colRef, orderBy('data_registro', 'desc'));
+    let q;
     if (usuarioId !== undefined) {
-      q = query(colRef, where('usuario_id', '==', usuarioId), orderBy('data_registro', 'desc'));
+      // Filtrando por usuario_id sem orderBy para evitar necessidade de índice composto
+      q = query(colRef, where('usuario_id', '==', usuarioId));
+    } else {
+      q = query(colRef, orderBy('data_registro', 'desc'));
     }
 
     const snapshot = await getDocs(q);
@@ -401,6 +404,13 @@ export const firebaseService = {
         hora_saida: saidaISO,
         duracao_minutos: duracao !== undefined ? Number(duracao) : null,
       });
+    });
+
+    // Ordena do mais recente para o mais antigo em memória
+    registros.sort((a, b) => {
+      const timeA = a.data_registro ? new Date(a.data_registro).getTime() : 0;
+      const timeB = b.data_registro ? new Date(b.data_registro).getTime() : 0;
+      return timeB - timeA;
     });
 
     return registros;

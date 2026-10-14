@@ -41,7 +41,7 @@ Sistema oficial de gestão de membros, presença e ponto biométrico da equipe *
 ## ✨ Funcionalidades
 
 - 👆 **Ponto Biométrico**: Leitura ultrarrápida com sensor USB DigitalPersona U.are.U 4000B e detecção inteligente de entrada/saída no mesmo dia.
-- 👥 **Gestão de Membros**: Cadastro completo por setor (Powertrain, Chassi & Suspensão, Eletrônica, etc.) e cargo, com gravação de digitais e contagem de presenças.
+- 👥 **Gestão de Membros**: Cadastro completo por área (Gestão, Projetos, Marketing, Manufatura, Tríplice e Trainee), com gravação de digitais e contagem de presenças.
 - 📊 **Relatório Mensal de Horas**: KPIs em tempo real com total de horas trabalhadas, membros ativos, ranking de dedicação por membro e exportação em 1 clique para planilha (CSV / Excel).
 - 🕒 **Histórico de Ponto**: Registro auditável de todas as batidas de ponto com hora exata de entrada, saída e permanência.
 - 📅 **Calendário**: Cronograma de treinos, reuniões de alinhamento e inspeções técnicas para a etapa SAE.
