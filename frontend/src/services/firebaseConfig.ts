@@ -14,7 +14,7 @@ export interface FirebaseConfigParams {
 const STORAGE_KEY = 'baja_gralha_firebase_config';
 const USE_FIREBASE_KEY = 'baja_gralha_use_firebase';
 
-// Obtém configuração padrão das variáveis de ambiente Vite (ou de valores salvos no localStorage)
+// Obtém configuração padrão das variáveis de ambiente Vite (.env) ou de valores salvos no localStorage
 export function getSavedFirebaseConfig(): FirebaseConfigParams | null {
   try {
     const fromStorage = localStorage.getItem(STORAGE_KEY);
@@ -28,7 +28,7 @@ export function getSavedFirebaseConfig(): FirebaseConfigParams | null {
     console.warn('Erro ao ler configuração Firebase do localStorage:', e);
   }
 
-  // Tenta ler de import.meta.env
+  // Lê do arquivo .env (VITE_FIREBASE_*)
   const env = import.meta.env;
   if (env.VITE_FIREBASE_PROJECT_ID && env.VITE_FIREBASE_API_KEY) {
     return {
