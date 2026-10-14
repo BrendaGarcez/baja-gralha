@@ -7,6 +7,7 @@ import type {
   UsuarioUpdate,
   RegistroPonto,
   RelatorioMensal,
+  StatusMembroRetorno,
 } from './types';
 import { isFirebaseEnabled } from './firebaseConfig';
 import { firebaseService } from './firebaseService';
@@ -55,6 +56,20 @@ export const biometryService = {
   // ==========================================
   // PONTO BIOMÉTRICO
   // ==========================================
+  async getStatusAtualMembro(usuarioId: number): Promise<StatusMembroRetorno> {
+    if (this.isFirebaseActive()) {
+      return await firebaseService.getStatusAtualMembro(usuarioId);
+    }
+    // Fallback básico para API local
+    const registros = await this.getRegistros(usuarioId);
+    const ultimo = registros[0];
+    return {
+      status: (ultimo && !ultimo.hora_saida ? 'DENTRO' : 'FORA') as 'DENTRO' | 'FORA',
+      proximaAcao: (ultimo && !ultimo.hora_saida ? 'SAIDA' : 'ENTRADA') as 'ENTRADA' | 'SAIDA',
+      ultimoRegistro: ultimo || null,
+    };
+  },
+
   async registrarPonto(payload: BiometriaRegistroPayload): Promise<RegistroResponse> {
     if (this.isFirebaseActive()) {
       return await firebaseService.registrarPonto(payload);

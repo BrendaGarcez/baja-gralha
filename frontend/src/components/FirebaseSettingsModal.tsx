@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
   Cloud,
-  CheckCircle2,
-  AlertTriangle,
   Database,
   Radio,
   ExternalLink,
@@ -47,12 +45,6 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
   const [useFirebase, setUseFirebase] = useState(true);
   const [activeTab, setActiveTab] = useState<'config' | 'migration' | 'hardware'>('config');
 
-  const [testStatus, setTestStatus] = useState<{
-    loading: boolean;
-    success?: boolean;
-    message?: string;
-  }>({ loading: false });
-
   const [migrando, setMigrando] = useState(false);
   const [migrationFeedback, setMigrationFeedback] = useState<string | null>(null);
 
@@ -65,7 +57,6 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
       }
       setUseFirebase(isFirebaseEnabled());
       setHardwareUrlState(biometryService.getHardwareUrl());
-      setTestStatus({ loading: false });
       setMigrationFeedback(null);
     }
   }, [isOpen]);
@@ -92,11 +83,6 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
             messagingSenderId: parsed.messagingSenderId || '',
             appId: parsed.appId || '',
           });
-          setTestStatus({
-            loading: false,
-            success: true,
-            message: 'Configuração detectada e preenchida com sucesso!',
-          });
         }
       }
     } catch {
@@ -106,11 +92,6 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
 
   const handleSalvar = () => {
     if (!config.apiKey || !config.projectId) {
-      setTestStatus({
-        loading: false,
-        success: false,
-        message: 'Preencha ao menos o apiKey e o projectId do Firebase.',
-      });
       return;
     }
 
@@ -119,36 +100,6 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
     biometryService.setHardwareUrl(hardwareUrl.trim() || 'http://localhost:5000/');
     resetFirebaseInstance();
     onConfigChanged();
-    setTestStatus({
-      loading: false,
-      success: true,
-      message: 'Configurações salvas com sucesso!',
-    });
-  };
-
-  const handleTestarConexao = async () => {
-    setTestStatus({ loading: true });
-    try {
-      // Salva temporariamente para testar
-      saveFirebaseConfig(config);
-      setFirebaseEnabled(true);
-      resetFirebaseInstance();
-
-      const usuarios = await firebaseService.getUsuarios();
-      setTestStatus({
-        loading: false,
-        success: true,
-        message: `Conexão bem sucedida com o Cloud Firestore! (${usuarios.length} membros carregados)`,
-      });
-      onConfigChanged();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Falha na conexão com o Firestore.';
-      setTestStatus({
-        loading: false,
-        success: false,
-        message: `Erro ao conectar: ${msg}`,
-      });
-    }
   };
 
   const handleMigrarDoSQLite = async () => {
@@ -172,41 +123,39 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Cabeçalho */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50/60">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-300 p-[1px] shadow-lg shadow-amber-950/50">
-              <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center text-amber-400">
-                <Cloud className="w-5 h-5" />
-              </div>
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+              <Cloud className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 Conexão com a Nuvem (Firebase)
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Acesse o sistema de qualquer lugar pela internet e sincronize membros em tempo real
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-100 hover:bg-slate-800 rounded-lg transition"
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Abas */}
-        <div className="flex border-b border-slate-800 bg-slate-950/50 px-6 gap-2 pt-2">
+        <div className="flex border-b border-slate-200 bg-slate-50/40 px-6 gap-2 pt-2">
           <button
             onClick={() => setActiveTab('config')}
             className={`px-3 py-2 text-xs font-semibold border-b-2 transition flex items-center gap-1.5 ${
               activeTab === 'config'
-                ? 'border-amber-400 text-amber-300'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Cloud className="w-3.5 h-3.5" /> Credenciais Firebase
@@ -215,8 +164,8 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
             onClick={() => setActiveTab('hardware')}
             className={`px-3 py-2 text-xs font-semibold border-b-2 transition flex items-center gap-1.5 ${
               activeTab === 'hardware'
-                ? 'border-amber-400 text-amber-300'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <Radio className="w-3.5 h-3.5" /> Leitor Local / Hardware
@@ -225,8 +174,8 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
             onClick={() => setActiveTab('migration')}
             className={`px-3 py-2 text-xs font-semibold border-b-2 transition flex items-center gap-1.5 ${
               activeTab === 'migration'
-                ? 'border-amber-400 text-amber-300'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             <UploadCloud className="w-3.5 h-3.5" /> Migrar do SQLite
@@ -234,35 +183,35 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
         </div>
 
         {/* Conteúdo */}
-        <div className="p-6 overflow-y-auto space-y-5 flex-1">
+        <div className="p-6 overflow-y-auto space-y-5 flex-1 bg-white">
           {activeTab === 'config' && (
             <>
               {/* Status Banner */}
-              <div className="flex items-center justify-between p-3.5 bg-slate-950/60 border border-slate-800 rounded-xl">
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
                 <div className="flex items-center gap-2.5">
                   <div
                     className={`w-3 h-3 rounded-full ${
-                      config.projectId ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
+                      config.projectId ? 'bg-emerald-500 ring-2 ring-emerald-200 animate-pulse' : 'bg-amber-500'
                     }`}
                   />
                   <div>
-                    <span className="text-xs font-semibold text-slate-200">
+                    <span className="text-xs font-semibold text-slate-800">
                       {config.projectId
                         ? `Conectado ao Projeto: ${config.projectId}`
                         : 'Nenhum projeto configurado (Modo Local ativo)'}
                     </span>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-slate-500">
                       Banco de dados na nuvem Cloud Firestore
                     </p>
                   </div>
                 </div>
 
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-300">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
                   <input
                     type="checkbox"
                     checked={useFirebase}
                     onChange={e => setUseFirebase(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-amber-500 focus:ring-amber-500"
+                    className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                   />
                   <span>Habilitar Firebase</span>
                 </label>
@@ -271,15 +220,15 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
               {/* Colar Config do Console */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                    <Copy className="w-3.5 h-3.5 text-amber-400" />
+                  <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                    <Copy className="w-3.5 h-3.5 text-blue-600" />
                     Colar Código do Console Firebase (Rápido)
                   </label>
                   <a
                     href="https://console.firebase.google.com/"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[11px] text-cyan-400 hover:underline flex items-center gap-1"
+                    className="text-[11px] text-blue-600 hover:underline flex items-center gap-1 font-medium"
                   >
                     Abrir Firebase Console <ExternalLink className="w-3 h-3" />
                   </a>
@@ -289,109 +238,92 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
                   value={jsonInput}
                   onChange={e => handleJsonPaste(e.target.value)}
                   placeholder={'Cole aqui o objeto firebaseConfig do Console Firebase...\nExemplo:\nconst firebaseConfig = { apiKey: "...", projectId: "..." };'}
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono text-slate-200 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition"
                 />
               </div>
 
               {/* Campos individuais */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <div>
-                  <label className="text-[11px] font-medium text-slate-400">Project ID *</label>
+                  <label className="text-[11px] font-medium text-slate-600">Project ID *</label>
                   <input
                     type="text"
                     value={config.projectId}
                     onChange={e => setConfig({ ...config, projectId: e.target.value })}
                     placeholder="baja-gralha-12345"
-                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-medium text-slate-400">API Key *</label>
+                  <label className="text-[11px] font-medium text-slate-600">API Key *</label>
                   <input
                     type="password"
                     value={config.apiKey}
                     onChange={e => setConfig({ ...config, apiKey: e.target.value })}
                     placeholder="sua_chave_firebase_aqui"
-                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-medium text-slate-400">Auth Domain</label>
+                  <label className="text-[11px] font-medium text-slate-600">Auth Domain</label>
                   <input
                     type="text"
                     value={config.authDomain}
                     onChange={e => setConfig({ ...config, authDomain: e.target.value })}
                     placeholder="baja-gralha.firebaseapp.com"
-                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-medium text-slate-400">Storage Bucket</label>
+                  <label className="text-[11px] font-medium text-slate-600">Storage Bucket</label>
                   <input
                     type="text"
                     value={config.storageBucket}
                     onChange={e => setConfig({ ...config, storageBucket: e.target.value })}
                     placeholder="baja-gralha.firebasestorage.app"
-                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-medium text-slate-400">App ID</label>
+                  <label className="text-[11px] font-medium text-slate-600">App ID</label>
                   <input
                     type="text"
                     value={config.appId}
                     onChange={e => setConfig({ ...config, appId: e.target.value })}
                     placeholder="1:12345:web:abcdef"
-                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition"
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-medium text-slate-400">Messaging Sender ID</label>
+                  <label className="text-[11px] font-medium text-slate-600">Messaging Sender ID</label>
                   <input
                     type="text"
                     value={config.messagingSenderId}
                     onChange={e => setConfig({ ...config, messagingSenderId: e.target.value })}
                     placeholder="123456789"
-                    className="w-full px-3 py-1.5 bg-slate-950 border border-slate-800 rounded-lg text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+                    className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition"
                   />
                 </div>
               </div>
-
-              {testStatus.message && (
-                <div
-                  className={`p-3 rounded-lg text-xs flex items-start gap-2 border ${
-                    testStatus.success
-                      ? 'bg-emerald-950/40 border-emerald-800/80 text-emerald-200'
-                      : 'bg-rose-950/40 border-rose-800/80 text-rose-200'
-                  }`}
-                >
-                  {testStatus.success ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  ) : (
-                    <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-                  )}
-                  <span>{testStatus.message}</span>
-                </div>
-              )}
             </>
           )}
 
           {activeTab === 'hardware' && (
             <div className="space-y-4">
-              <div className="p-3.5 bg-cyan-950/30 border border-cyan-800/60 rounded-xl text-xs text-cyan-200 flex items-start gap-2.5">
-                <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+              <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl text-xs text-blue-900 flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-semibold">Como funciona com o sensor na máquina local?</p>
-                  <p className="text-slate-300 mt-1 leading-relaxed">
+                  <p className="font-semibold text-blue-950">Como funciona com o sensor na máquina local?</p>
+                  <p className="text-blue-800 mt-1 leading-relaxed">
                     Quando você acessa o site pela internet, a página roda no navegador do seu dispositivo. 
                     Se você estiver no computador da oficina (com o sensor USB conectado), a página se comunica com o serviço C# rodando em <code>http://localhost:5000/</code>. 
-                    Assim, o ponto é capturado localmente e enviado imediatamente para o Firebase na nuvem!
+                    Assim, o ponto é capturado localmente e sincronizado diretamente no Cloud Firestore!
                   </p>
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-300">
+                <label className="text-xs font-semibold text-slate-700">
                   Endereço do Serviço do Sensor Biométrico (C#)
                 </label>
                 <input
@@ -399,9 +331,9 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
                   value={hardwareUrl}
                   onChange={e => setHardwareUrlState(e.target.value)}
                   placeholder="http://localhost:5000/"
-                  className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-xs font-mono text-slate-100 placeholder-slate-600 focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white focus:ring-1 focus:ring-blue-500 transition"
                 />
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-500">
                   Padrão: <code>http://localhost:5000/</code> (computador local da oficina). Se o sensor estiver em outro computador na rede local, você pode colocar o IP dele (ex: <code>http://192.168.1.50:5000/</code>).
                 </p>
               </div>
@@ -410,11 +342,11 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
 
           {activeTab === 'migration' && (
             <div className="space-y-4">
-              <div className="p-3.5 bg-slate-950/60 border border-slate-800 rounded-xl text-xs text-slate-300 space-y-2">
-                <p className="font-semibold text-slate-100 flex items-center gap-2">
-                  <Database className="w-4 h-4 text-amber-400" /> Transferir dados existentes para a nuvem
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 space-y-2">
+                <p className="font-semibold text-slate-900 flex items-center gap-2">
+                  <Database className="w-4 h-4 text-blue-600" /> Transferir dados existentes para a nuvem
                 </p>
-                <p className="text-slate-400 leading-relaxed">
+                <p className="text-slate-600 leading-relaxed">
                   Se você já cadastrou membros ou possui registros no banco de dados local SQLite (FastAPI), 
                   este botão copia todos os membros e histórico de pontos diretamente para o Cloud Firestore no Firebase!
                 </p>
@@ -424,7 +356,7 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
                 type="button"
                 disabled={migrando || !config.projectId}
                 onClick={handleMigrarDoSQLite}
-                className="w-full py-2.5 px-4 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-800 disabled:text-slate-600 text-white font-semibold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold text-xs rounded-xl shadow-md shadow-blue-500/20 transition flex items-center justify-center gap-2"
               >
                 {migrando ? (
                   <>
@@ -440,7 +372,7 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
               </button>
 
               {migrationFeedback && (
-                <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-lg text-xs font-mono text-slate-200">
+                <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono text-slate-700">
                   {migrationFeedback}
                 </div>
               )}
@@ -449,40 +381,24 @@ export const FirebaseSettingsModal: React.FC<FirebaseSettingsModalProps> = ({
         </div>
 
         {/* Rodapé / Ações */}
-        <div className="px-6 py-4 border-t border-slate-800 bg-slate-950/70 flex items-center justify-between gap-3">
+        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-end gap-2">
           <button
             type="button"
-            onClick={handleTestarConexao}
-            disabled={testStatus.loading || !config.apiKey}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1.5"
+            onClick={onClose}
+            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-lg transition"
           >
-            {testStatus.loading ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-            )}
-            Testar Conexão
+            Fechar
           </button>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 rounded-lg transition"
-            >
-              Fechar
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                handleSalvar();
-                onClose();
-              }}
-              className="px-4 py-2 text-xs font-semibold bg-amber-600 hover:bg-amber-500 text-white rounded-lg shadow-md shadow-amber-950/50 transition"
-            >
-              Salvar Alterações
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              handleSalvar();
+              onClose();
+            }}
+            className="px-4 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md shadow-blue-500/20 transition"
+          >
+            Salvar Alterações
+          </button>
         </div>
       </div>
     </div>

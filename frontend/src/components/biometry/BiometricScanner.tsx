@@ -19,24 +19,24 @@ export const BiometricScanner: FC<BiometricScannerProps> = ({
     switch (state) {
       case 'WAITING_FINGER':
         return {
-          ringColor: 'border-cyan-500 shadow-lg shadow-cyan-500/20',
-          iconColor: 'text-cyan-400',
+          ringColor: 'border-blue-500 shadow-xl shadow-blue-500/20 bg-blue-50/40',
+          iconColor: 'text-blue-600',
           statusText: 'Aguardando dedo no leitor USB...',
           subText: 'Posicione o dedo indicador firmemente no sensor',
           showRipple: true,
         };
       case 'PROCESSING':
         return {
-          ringColor: 'border-amber-500 shadow-lg shadow-amber-500/30 animate-pulse',
-          iconColor: 'text-amber-400',
+          ringColor: 'border-amber-500 shadow-xl shadow-amber-500/25 bg-amber-50/40 animate-pulse',
+          iconColor: 'text-amber-600',
           statusText: 'Processando biometria...',
           subText: 'Extraindo minúcias e gerando template...',
           showRipple: false,
         };
       case 'SUCCESS':
         return {
-          ringColor: 'border-emerald-500 shadow-lg shadow-emerald-500/30',
-          iconColor: 'text-emerald-400',
+          ringColor: 'border-emerald-500 shadow-xl shadow-emerald-500/25 bg-emerald-50/60',
+          iconColor: 'text-emerald-600',
           statusText: 'Digital lida com sucesso!',
           subText: 'Template biométrico gerado e pronto para envio',
           showRipple: false,
@@ -44,8 +44,8 @@ export const BiometricScanner: FC<BiometricScannerProps> = ({
       case 'OFFLINE':
       case 'ERROR':
         return {
-          ringColor: 'border-rose-500 shadow-lg shadow-rose-500/20',
-          iconColor: 'text-rose-400',
+          ringColor: 'border-rose-400 shadow-lg shadow-rose-500/15 bg-rose-50/60',
+          iconColor: 'text-rose-500',
           statusText: 'Serviço C# não detectado',
           subText: 'Execute o ConsoleApp1 e certifique-se da porta 5000',
           showRipple: false,
@@ -53,8 +53,8 @@ export const BiometricScanner: FC<BiometricScannerProps> = ({
       case 'IDLE':
       default:
         return {
-          ringColor: 'border-slate-800 hover:border-slate-700',
-          iconColor: 'text-slate-500',
+          ringColor: 'border-slate-300 hover:border-slate-400 bg-slate-100/60',
+          iconColor: 'text-slate-400',
           statusText: 'Sensor em repouso',
           subText: 'Clique no botão abaixo para habilitar a captura',
           showRipple: false,
@@ -65,57 +65,74 @@ export const BiometricScanner: FC<BiometricScannerProps> = ({
   const config = getVisualConfig();
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-slate-900/60 border border-slate-800/80 rounded-2xl backdrop-blur-sm transition">
+    <div className="flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-2xl shadow-xs transition">
       {/* Visual do Sensor */}
-      <div className="relative flex items-center justify-center mb-6 mt-2">
+      <div className="relative flex items-center justify-center mb-5 mt-2">
         {config.showRipple && (
-          <div className="absolute w-36 h-36 rounded-full border border-cyan-500/40 animate-ping" />
+          <div className="absolute w-36 h-36 rounded-full border-2 border-blue-400/40 animate-ping" />
         )}
 
         <div
-          className={`relative z-10 flex items-center justify-center w-28 h-28 rounded-full border-2 bg-slate-950/90 shadow-2xl transition-all duration-300 ${config.ringColor}`}
+          className={`relative z-10 flex items-center justify-center w-28 h-28 rounded-full border-2 shadow-inner transition-all duration-300 ${config.ringColor}`}
         >
           {state === 'SUCCESS' ? (
-            <CheckCircle2 className="w-14 h-14 text-emerald-400 animate-bounce" />
+            <CheckCircle2 className="w-14 h-14 text-emerald-600 animate-bounce" />
           ) : state === 'OFFLINE' || state === 'ERROR' ? (
-            <AlertCircle className="w-14 h-14 text-rose-400" />
+            <AlertCircle className="w-14 h-14 text-rose-500 animate-pulse" />
           ) : (
-            <Fingerprint className={`w-14 h-14 transition-colors duration-300 ${config.iconColor}`} />
+            <Fingerprint
+              className={`w-14 h-14 transition-all duration-300 ${config.iconColor} ${
+                state === 'WAITING_FINGER'
+                  ? 'animate-pulse scale-105'
+                  : state === 'PROCESSING'
+                  ? 'animate-spin'
+                  : ''
+              }`}
+            />
           )}
         </div>
       </div>
 
-      {/* Descrição do Estado */}
-      <div className="text-center space-y-1 mb-6">
-        <h4 className="text-sm font-semibold text-slate-100 flex items-center justify-center gap-2">
-          {state === 'WAITING_FINGER' && <Radio className="w-4 h-4 text-cyan-400 animate-pulse" />}
+      {/* Textos de Estado com alta legibilidade (IHC) */}
+      <div className="text-center mb-6">
+        <h4 className="text-sm font-bold text-slate-800 transition-colors">
           {config.statusText}
         </h4>
-        <p className="text-xs text-slate-400 max-w-xs">{config.subText}</p>
+        <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+          {config.subText}
+        </p>
       </div>
 
-      {/* Botões de Ação */}
-      <div className="flex items-center gap-3 w-full max-w-xs">
-        {state === 'WAITING_FINGER' || state === 'PROCESSING' ? (
+      {/* Ações / Botões */}
+      <div className="flex gap-2 w-full max-w-xs">
+        {state === 'IDLE' ? (
           <button
             type="button"
-            onClick={onReset}
-            className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center justify-center gap-2 active:scale-98"
+            onClick={onStart}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm shadow-blue-500/20 active:scale-98 transition"
           >
-            <RefreshCw className="w-3.5 h-3.5" /> Cancelar Leitura
+            <Radio className="w-4 h-4 animate-pulse" />
+            Ativar Leitor
           </button>
         ) : (
           <button
             type="button"
-            onClick={onStart}
-            disabled={hasTemplate}
-            className="w-full py-2.5 px-4 bg-cyan-600 hover:bg-cyan-500 disabled:bg-slate-800 disabled:text-slate-600 text-white text-xs font-semibold rounded-lg shadow-lg shadow-cyan-900/30 transition flex items-center justify-center gap-2 active:scale-98"
+            onClick={onReset}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs border border-slate-300 active:scale-98 transition"
           >
-            <Fingerprint className="w-4 h-4" />
-            {hasTemplate ? 'Digital Pronta' : 'Iniciar Captura'}
+            <RefreshCw className="w-3.5 h-3.5" />
+            Reiniciar Leitor
           </button>
         )}
       </div>
+
+      {/* Indicador de Template Pronto */}
+      {hasTemplate && state === 'SUCCESS' && (
+        <div className="mt-4 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold flex items-center gap-1.5 shadow-xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          Biometria capturada com sucesso!
+        </div>
+      )}
     </div>
   );
 };

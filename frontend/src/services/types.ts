@@ -59,6 +59,14 @@ export interface UsuarioUpdate {
   template_base64?: string;
 }
 
+export interface StatusMembroRetorno {
+  status: 'FORA' | 'DENTRO' | 'SEM_SAIDA_ANTERIOR';
+  proximaAcao: 'ENTRADA' | 'SAIDA';
+  ultimoRegistro?: RegistroPonto | null;
+  horarioEntradaFormatado?: string;
+  tempoDecorridoFormatado?: string;
+}
+
 // ==========================================
 // Tipos de Registros de Ponto
 // ==========================================
@@ -74,7 +82,7 @@ export interface RegistroPonto {
 }
 
 // ==========================================
-// Tipos do Relatório Mensal
+// Tipos do Relatório Mensal e por Setor
 // ==========================================
 export interface MembroHorasResumo {
   usuario_id: number;
@@ -84,6 +92,18 @@ export interface MembroHorasResumo {
   total_minutos: number;
   total_horas_formatado: string;
   total_dias_presente: number;
+}
+
+export interface SetorPresencaResumo {
+  setor: string;
+  total_membros_cadastrados: number;
+  total_membros_presentes: number;
+  total_presencas: number;
+  total_minutos: number;
+  total_horas_formatado: string;
+  media_minutos_por_membro: number;
+  media_horas_por_membro_formatada: string;
+  percentual_horas: number;
 }
 
 export interface RelatorioMensal {
@@ -96,5 +116,6 @@ export interface RelatorioMensal {
   membros_ativos_qtd: number;
   media_horas_dia_formatada: string;
   membros_resumo: MembroHorasResumo[];
+  setores_resumo: SetorPresencaResumo[];
   registros: RegistroPonto[];
 }
