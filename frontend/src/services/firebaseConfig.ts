@@ -28,16 +28,17 @@ export function getSavedFirebaseConfig(): FirebaseConfigParams | null {
     console.warn('Erro ao ler configuração Firebase do localStorage:', e);
   }
 
-  // Lê do arquivo .env (VITE_FIREBASE_*)
-  const env = import.meta.env;
-  if (env.VITE_FIREBASE_PROJECT_ID && env.VITE_FIREBASE_API_KEY) {
+  // Lê do arquivo .env de forma estática direta (exigência do Vite em compilações de produção)
+  const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+  const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+  if (projectId && apiKey) {
     return {
-      apiKey: env.VITE_FIREBASE_API_KEY,
-      authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || `${env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-      projectId: env.VITE_FIREBASE_PROJECT_ID,
-      storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || `${env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
-      messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-      appId: env.VITE_FIREBASE_APP_ID || '',
+      apiKey,
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || `${projectId}.firebaseapp.com`,
+      projectId,
+      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || `${projectId}.firebasestorage.app`,
+      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+      appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
     };
   }
 
