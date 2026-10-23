@@ -14,8 +14,18 @@ export interface FirebaseConfigParams {
 const STORAGE_KEY = 'baja_gralha_firebase_config';
 const USE_FIREBASE_KEY = 'baja_gralha_use_firebase';
 
-// Obtém configuração padrão das variáveis de ambiente Vite (.env) ou de valores salvos no localStorage
-export function getSavedFirebaseConfig(): FirebaseConfigParams | null {
+// Credenciais oficiais do projeto Baja Gralha na nuvem (Cloud Firestore)
+export const DEFAULT_FIREBASE_CONFIG: FirebaseConfigParams = {
+  apiKey: 'AIzaSyAc8_ol9UBa-pX8t3vGZ8jckeVoN0tLkqg',
+  authDomain: 'baja-gralha.firebaseapp.com',
+  projectId: 'baja-gralha',
+  storageBucket: 'baja-gralha.firebasestorage.app',
+  messagingSenderId: '260124987644',
+  appId: '1:260124987644:web:daa74ca9c23b4957484779',
+};
+
+// Obtém configuração padrão das variáveis de ambiente Vite (.env), localStorage ou credenciais oficiais
+export function getSavedFirebaseConfig(): FirebaseConfigParams {
   try {
     const fromStorage = localStorage.getItem(STORAGE_KEY);
     if (fromStorage) {
@@ -28,7 +38,7 @@ export function getSavedFirebaseConfig(): FirebaseConfigParams | null {
     console.warn('Erro ao ler configuração Firebase do localStorage:', e);
   }
 
-  // Lê do arquivo .env de forma estática direta (exigência do Vite em compilações de produção)
+  // Lê do arquivo .env de forma estática direta (Vite)
   const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
   const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
   if (projectId && apiKey) {
@@ -42,7 +52,8 @@ export function getSavedFirebaseConfig(): FirebaseConfigParams | null {
     };
   }
 
-  return null;
+  // Padrão oficial na nuvem sempre ativo
+  return DEFAULT_FIREBASE_CONFIG;
 }
 
 export function saveFirebaseConfig(config: FirebaseConfigParams | null): void {
@@ -55,14 +66,13 @@ export function saveFirebaseConfig(config: FirebaseConfigParams | null): void {
   }
 }
 
+// Conexão com a nuvem está sempre habilitada por padrão
 export function isFirebaseEnabled(): boolean {
-  const userPref = localStorage.getItem(USE_FIREBASE_KEY);
-  if (userPref === 'false') return false;
-  return Boolean(getSavedFirebaseConfig());
+  return true;
 }
 
-export function setFirebaseEnabled(enabled: boolean): void {
-  localStorage.setItem(USE_FIREBASE_KEY, enabled ? 'true' : 'false');
+export function setFirebaseEnabled(_enabled: boolean): void {
+  localStorage.setItem(USE_FIREBASE_KEY, 'true');
 }
 
 let cachedApp: FirebaseApp | null = null;

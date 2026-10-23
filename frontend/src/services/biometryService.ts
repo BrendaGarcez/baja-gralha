@@ -15,6 +15,17 @@ import { firebaseService } from './firebaseService';
 const DEFAULT_CSHARP_URL = 'http://localhost:5000/';
 const DEFAULT_API_BASE = 'http://127.0.0.1:8083';
 
+async function fetchLocalApi(url: string | URL, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url.toString(), init);
+  } catch (err: unknown) {
+    if (err instanceof TypeError || String(err).includes('fetch')) {
+      throw new Error(`Falha ao conectar no backend local (${url.toString()}).`);
+    }
+    throw err;
+  }
+}
+
 export const biometryService = {
   // ==========================================
   // CONFIGURAÇÕES DE REDE / HARDWARE
@@ -76,7 +87,7 @@ export const biometryService = {
     }
 
     const apiBase = this.getApiBase();
-    const response = await fetch(`${apiBase}/biometria/capturar`, {
+    const response = await fetchLocalApi(`${apiBase}/biometria/capturar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -100,7 +111,7 @@ export const biometryService = {
     const apiBase = this.getApiBase();
     const url = new URL(`${apiBase}/registros`);
     if (usuarioId !== undefined) url.searchParams.set('usuario_id', String(usuarioId));
-    const response = await fetch(url.toString());
+    const response = await fetchLocalApi(url.toString());
     if (!response.ok) throw new Error(`Erro ao buscar registros (HTTP ${response.status})`);
     return response.json();
   },
@@ -114,7 +125,7 @@ export const biometryService = {
     }
 
     const apiBase = this.getApiBase();
-    const response = await fetch(`${apiBase}/usuarios`);
+    const response = await fetchLocalApi(`${apiBase}/usuarios`);
     if (!response.ok) throw new Error(`Erro ao buscar membros (HTTP ${response.status})`);
     return response.json();
   },
@@ -125,7 +136,7 @@ export const biometryService = {
     }
 
     const apiBase = this.getApiBase();
-    const response = await fetch(`${apiBase}/usuarios`, {
+    const response = await fetchLocalApi(`${apiBase}/usuarios`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -143,7 +154,7 @@ export const biometryService = {
     }
 
     const apiBase = this.getApiBase();
-    const response = await fetch(`${apiBase}/usuarios/${id}`, {
+    const response = await fetchLocalApi(`${apiBase}/usuarios/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -161,7 +172,7 @@ export const biometryService = {
     }
 
     const apiBase = this.getApiBase();
-    const response = await fetch(`${apiBase}/usuarios/${id}`, { method: 'DELETE' });
+    const response = await fetchLocalApi(`${apiBase}/usuarios/${id}`, { method: 'DELETE' });
     if (!response.ok) {
       const err = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
       throw new Error(err.detail || `Erro ao remover membro (HTTP ${response.status})`);
@@ -187,7 +198,7 @@ export const biometryService = {
     url.searchParams.set('ano', String(ano));
     if (usuarioId !== undefined) url.searchParams.set('usuario_id', String(usuarioId));
     if (setor && setor !== 'Todos') url.searchParams.set('setor', setor);
-    const response = await fetch(url.toString());
+    const response = await fetchLocalApi(url.toString());
     if (!response.ok) throw new Error(`Erro ao buscar relatório (HTTP ${response.status})`);
     return response.json();
   },
