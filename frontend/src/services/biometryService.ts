@@ -8,6 +8,8 @@ import type {
   RegistroPonto,
   RelatorioMensal,
   StatusMembroRetorno,
+  EventoAgenda,
+  EventoAgendaCreate,
 } from './types';
 import { isFirebaseEnabled } from './firebaseConfig';
 import { firebaseService } from './firebaseService';
@@ -214,5 +216,28 @@ export const biometryService = {
     const usuarios = await resU.json();
     const registros = resR.ok ? await resR.json() : [];
     return { usuarios, registros };
+  },
+
+  // ==========================================
+  // AGENDA / EVENTOS
+  // ==========================================
+  async getEventos(): Promise<EventoAgenda[]> {
+    if (this.isFirebaseActive()) {
+      return await firebaseService.getEventos();
+    }
+    return [];
+  },
+
+  async createEvento(payload: EventoAgendaCreate): Promise<EventoAgenda> {
+    if (this.isFirebaseActive()) {
+      return await firebaseService.createEvento(payload);
+    }
+    throw new Error('Firebase não está ativo para salvar eventos.');
+  },
+
+  async deleteEvento(id: string): Promise<void> {
+    if (this.isFirebaseActive()) {
+      return await firebaseService.deleteEvento(id);
+    }
   }
 };

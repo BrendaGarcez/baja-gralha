@@ -119,3 +119,31 @@ export interface RelatorioMensal {
   setores_resumo: SetorPresencaResumo[];
   registros: RegistroPonto[];
 }
+
+// ==========================================
+// Tipos de Eventos da Agenda
+// ==========================================
+export type CategoriaEvento = 'treino' | 'reuniao' | 'competicao' | 'outro';
+
+export interface EventoAgenda {
+  id: string;
+  titulo: string;
+  data: string;
+  hora: string;
+  local: string;
+  categoria: CategoriaEvento;
+  descricao?: string;
+  tags?: string[];
+  criado_em?: string;
+}
+
+export interface EventoAgendaCreate {
+  titulo: string;
+  data: string;
+  hora: string;
+  local: string;
+  categoria: CategoriaEvento;
+  descricao?: string;
+  tags?: string[];
+}
+

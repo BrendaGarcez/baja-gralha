@@ -22,6 +22,8 @@ import type {
   RelatorioMensal,
   MembroHorasResumo,
   SetorPresencaResumo,
+  EventoAgenda,
+  EventoAgendaCreate,
 } from './types';
 import { getBrasiliaParts, formatarHoraBrasilia } from '../utils/brasiliaTime';
 
@@ -604,5 +606,71 @@ export const firebaseService = {
 
     await batch.commit();
     return { usuariosMigrados: uCount, registrosMigrados: rCount };
+  },
+
+  // ==========================================
+  // AGENDA & EVENTOS DA EQUIPE
+  // ==========================================
+  async getEventos(): Promise<EventoAgenda[]> {
+    const { db } = getFirebaseInstances();
+    if (!db) throw new Error('Firebase não está configurado.');
+
+    const colRef = collection(db, 'eventos_agenda');
+    const snapshot = await getDocs(colRef);
+
+    const eventos: EventoAgenda[] = [];
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      eventos.push({
+        id: docSnap.id,
+        titulo: data.titulo || 'Sem título',
+        data: data.data || '',
+        hora: data.hora || '',
+        local: data.local || '',
+        categoria: data.categoria || 'reuniao',
+        descricao: data.descricao || '',
+        tags: Array.isArray(data.tags) ? data.tags : [],
+        criado_em: dataParaISO(data.criado_em),
+      });
+    });
+
+    // Ordena por data mais recente / cronológica
+    return eventos.sort((a, b) => a.data.localeCompare(b.data));
+  },
+
+  async createEvento(payload: EventoAgendaCreate): Promise<EventoAgenda> {
+    const { db } = getFirebaseInstances();
+    if (!db) throw new Error('Firebase não está configurado.');
+
+    const colRef = collection(db, 'eventos_agenda');
+    const newDocRef = doc(colRef);
+    const agora = new Date();
+
+    const novoEvento: EventoAgenda = {
+      id: newDocRef.id,
+      titulo: payload.titulo.trim(),
+      data: payload.data.trim(),
+      hora: payload.hora.trim(),
+      local: payload.local.trim(),
+      categoria: payload.categoria,
+      descricao: payload.descricao?.trim() || '',
+      tags: payload.tags || [],
+      criado_em: agora.toISOString(),
+    };
+
+    await setDoc(newDocRef, {
+      ...novoEvento,
+      criado_em: Timestamp.fromDate(agora),
+    });
+
+    return novoEvento;
+  },
+
+  async deleteEvento(id: string): Promise<void> {
+    const { db } = getFirebaseInstances();
+    if (!db) throw new Error('Firebase não está configurado.');
+
+    const docRef = doc(db, 'eventos_agenda', String(id));
+    await deleteDoc(docRef);
   }
 };
